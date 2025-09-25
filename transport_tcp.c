@@ -228,14 +228,21 @@ static int ksmbd_tcp_new_connection(struct socket *client_sk)
 		return -ENOMEM;
 	}
 
-	if (client_sk->sk->sk_family == AF_INET6)
+	if (client_sk->sk->sk_family == AF_INET6) {
+		snprintf(KSMBD_TRANS(t)->conn->client_name,
+			 sizeof(KSMBD_TRANS(t)->conn->client_name),
+			 "%pI6", &KSMBD_TRANS(t)->conn->inet6_addr);
 		handler = kthread_run(ksmbd_conn_handler_loop,
 				KSMBD_TRANS(t)->conn, "ksmbd:%pI6c",
 				&KSMBD_TRANS(t)->conn->inet6_addr);
-	else
+	} else {
+		snprintf(KSMBD_TRANS(t)->conn->client_name,
+			 sizeof(KSMBD_TRANS(t)->conn->client_name),
+			 "%pI4", &KSMBD_TRANS(t)->conn->inet_addr);
 		handler = kthread_run(ksmbd_conn_handler_loop,
 				KSMBD_TRANS(t)->conn, "ksmbd:%pI4",
 				&KSMBD_TRANS(t)->conn->inet_addr);
+	}
 	if (IS_ERR(handler)) {
 		pr_err("cannot start conn thread\n");
 		rc = PTR_ERR(handler);
