@@ -44,6 +44,7 @@
 #include "mgmt/user_session.h"
 #include "mgmt/ksmbd_ida.h"
 #include "ndr.h"
+#include "stats.h"
 #include "transport_tcp.h"
 
 static void __wbuf(struct ksmbd_work *work, void **req, void **rsp)
@@ -230,6 +231,12 @@ u16 get_smb2_cmd_val(struct ksmbd_work *work)
 		rcv_hdr = smb2_get_msg(work->request_buf);
 	return le16_to_cpu(rcv_hdr->Command);
 }
+
+void smb2_inc_reqs(unsigned int cmd)
+{
+	ksmbd_counter_inc_reqs(cmd);
+}
+
 
 /**
  * set_smb2_rsp_status() - set error response code on smb2 header
